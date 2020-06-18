@@ -3,13 +3,13 @@
 #include <set>
 #include "Source.h"
 
-const int SCREENWIDTH = 1920;
-const int SCREENHEIGHT = 1080;
+const int SCREENWIDTH = 1600;
+const int SCREENHEIGHT = 900;
 const int DECKSIZE = 52;
 const int CARDSIZE = 13;
 const int SUITESIZE = 4;
-const int CARDWIDTH = 150;
-const int CARDHEIGHT = 200;
+const int CARDWIDTH = 125;
+const int CARDHEIGHT = 175; // TODO - Use Screen width to make the cards scale
 
 const sf::Color CARDBACKCOLOR = sf::Color(64, 55, 171); // Add the rest of the item colors
 
@@ -68,6 +68,9 @@ sf::Clock mouseClock;
 sf::RectangleShape slotBackgrounds[SUITESIZE]; // The rectangles that draw the background for the 4 ace piles
 sf::RectangleShape pileBackgrounds[7];// The rectangles that draw the background for the 7 card piles
 
+sf::Font font;
+sf::Text undoText;
+
 bool bIsGameOver = false;
 
 int main()
@@ -81,6 +84,19 @@ int main()
 
 	sf::Vector2f translatedPos;
 	sf::Vector2f lastPos;
+
+	if (font.loadFromFile("Fonts/LiberationSans.ttf"))
+	{
+		undoText.setFont(font);
+		undoText.setString("UNDO");
+		undoText.setCharacterSize(24);
+		undoText.setFillColor(sf::Color::White);
+		undoText.setOutlineColor(sf::Color::Black);
+		undoText.setOutlineThickness(1);
+		undoText.setStyle(sf::Text::Bold);
+		sf::FloatRect boundingBox = undoText.getGlobalBounds();
+		undoText.setPosition(sf::Vector2f(SCREENWIDTH - 147, SCREENHEIGHT - 50));
+	}
 
 	while (window.isOpen())
 	{
@@ -125,6 +141,8 @@ int main()
 		// Handles the drawing for each of the stacks, the deck, and held cards
 		DrawAllCards(window, slotBackgrounds, pileBackgrounds);
 	
+		window.draw(undoText);
+
 		window.display();
 	}
 
@@ -702,6 +720,12 @@ void MouseClicked(sf::RenderWindow& window, sf::Vector2f translatedPos, sf::Rect
 	heldCardStack.clear();
 
 	sf::Time timeSinceLastClick = mouseClock.restart();
+
+	if (undoText.getGlobalBounds().contains(translatedPos))
+	{
+		LoadFromHistory();
+		return;
+	}
 
 	//DRAWING DECK
 	if (drawingDeck.size() > 0 && drawingDeck.back()->cardBack.getGlobalBounds().contains(translatedPos))
