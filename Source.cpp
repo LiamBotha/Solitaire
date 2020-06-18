@@ -244,11 +244,21 @@ void DrawAcePiles(int i, sf::RenderWindow& window, sf::RectangleShape  slotBackg
 
 	if (length > 0)
 	{
-		//if (heldCardStack.size() != 0 && slot[i][length - 1] == heldCardStack[0])
-		//break;
+		if (heldCardStack.size() != 0 && slot[i][length - 1] == heldCardStack[0] && length > 1)
+		{
+			auto card = slot[i][length - 2];
+
+			if (card->suite == 1 || card->suite == 3)
+				card->cardBack.setFillColor(sf::Color::Red);
+			else
+				card->cardBack.setFillColor(sf::Color::White);
+
+			window.draw(card->cardBack);
+
+			HandleCardGraphics(card, window);
+		}
 
 		auto card = slot[i][length - 1];
-		card->cardBack.setPosition(slot[i][length - 1]->x, slot[i][length - 1]->y);
 
 		if (card->suite == 1 || card->suite == 3)
 			card->cardBack.setFillColor(sf::Color::Red);
