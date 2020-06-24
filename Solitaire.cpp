@@ -22,7 +22,16 @@ void Solitaire::GameStart()
 		undoText.setOutlineThickness(1);
 		undoText.setStyle(sf::Text::Bold);
 		sf::FloatRect boundingBox = undoText.getGlobalBounds();
-		undoText.setPosition(sf::Vector2f(SCREENWIDTH - 147, SCREENHEIGHT - 50));
+		undoText.setPosition(sf::Vector2f(SCREENWIDTH - 135, SCREENHEIGHT - 50));
+
+		restartText.setFont(font);
+		restartText.setString("RESTART");
+		restartText.setCharacterSize(24);
+		restartText.setFillColor(sf::Color::White);
+		restartText.setOutlineColor(sf::Color::Black);
+		restartText.setOutlineThickness(1);
+		restartText.setStyle(sf::Text::Bold);
+		restartText.setPosition(sf::Vector2f(40, SCREENHEIGHT - 50));
 	}
 
 	while (window.isOpen())
@@ -69,6 +78,14 @@ void Solitaire::GameStart()
 		DrawAllCards(window, slotBackgrounds, pileBackgrounds);
 
 		window.draw(undoText);
+		window.draw(restartText);
+
+		CheckForVictory();
+
+		if (bIsGameOver)
+		{
+			DrawUIText(window, "Victory", sf::Vector2f(SCREENWIDTH / 2, SCREENHEIGHT / 2), 75, 2);
+		}
 
 		window.display();
 	}
@@ -453,6 +470,11 @@ void Solitaire::MouseClicked(sf::RenderWindow& window, sf::Vector2f translatedPo
 		LoadFromHistory();
 		return;
 	}
+	else if (restartText.getGlobalBounds().contains(translatedPos))
+	{
+		RestartGame();
+		return;
+	}
 
 	//DRAWING DECK
 	if (drawingDeck.size() > 0 && drawingDeck.back()->cardBack.getGlobalBounds().contains(translatedPos))
@@ -568,12 +590,43 @@ void Solitaire::MouseClicked(sf::RenderWindow& window, sf::Vector2f translatedPo
 	}
 }
 
+void Solitaire::RestartGame()
+{
+	lastClickedCard = nullptr;
+
+	for (int i = 0; i < 3; i++)
+	{
+		drawnCards[i] = NULL;
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		slot[i].clear();
+	}
+
+	for (int i = 0; i < 7; i++)
+	{
+		cardPiles[i].clear();
+	}
+
+	drawingDeck.clear();
+	history.clear();
+	heldCardStack.clear();
+	mouseClock.restart();
+
+	bIsGameOver = false;
+
+	Initialize(pileBackgrounds, slotBackgrounds);
+}
+
 bool Solitaire::CheckIfDoubleClicked(Solitaire::Card* card, sf::Time timeSinceLastClick)
 {
 	if (card == lastClickedCard && timeSinceLastClick.asSeconds() < 0.3)
 	{
 		if ((slot[0].size() > 0 && (card->number == (slot[0].back()->number + 1) && card->suite == slot[0].back()->suite)) || (slot[0].size() == 0 && card->number == 0))
 		{
+			AddToHistory();
+
 			card->x = slotBackgrounds[0].getPosition().x;
 			card->y = slotBackgrounds[0].getPosition().y;
 
@@ -585,10 +638,11 @@ bool Solitaire::CheckIfDoubleClicked(Solitaire::Card* card, sf::Time timeSinceLa
 
 			slot[0].push_back(card);
 			RemoveCardFromPreviousLocation(card);
-			CheckForVictory();
 		}
 		else if ((slot[1].size() > 0 && (card->number == (slot[1].back()->number + 1) && card->suite == slot[1].back()->suite)) || (slot[1].size() == 0 && card->number == 0))
 		{
+			AddToHistory();
+
 			card->x = slotBackgrounds[1].getPosition().x;
 			card->y = slotBackgrounds[1].getPosition().y;
 
@@ -604,6 +658,8 @@ bool Solitaire::CheckIfDoubleClicked(Solitaire::Card* card, sf::Time timeSinceLa
 		}
 		else if ((slot[2].size() > 0 && (card->number == (slot[2].back()->number + 1) && card->suite == slot[2].back()->suite)) || (slot[2].size() == 0 && card->number == 0))
 		{
+			AddToHistory();
+
 			card->x = slotBackgrounds[2].getPosition().x;
 			card->y = slotBackgrounds[2].getPosition().y;
 
@@ -619,6 +675,8 @@ bool Solitaire::CheckIfDoubleClicked(Solitaire::Card* card, sf::Time timeSinceLa
 		}
 		else if ((slot[3].size() > 0 && (card->number == (slot[3].back()->number + 1) && card->suite == slot[3].back()->suite)) || (slot[3].size() == 0 && card->number == 0))
 		{
+			AddToHistory();
+
 			card->x = slotBackgrounds[3].getPosition().x;
 			card->y = slotBackgrounds[3].getPosition().y;
 
@@ -784,7 +842,6 @@ void Solitaire::CheckForVictory()
 	if (lengthA == 13 && lengthB == 13 && lengthC == 13 && lengthD == 13)
 	{
 		bIsGameOver = true;
-		std::cout << "Game Over";
 	}
 }
 

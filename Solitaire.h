@@ -77,6 +77,7 @@ private:
 
 	sf::Font font;
 	sf::Text undoText;
+	sf::Text restartText;
 
 	bool bIsGameOver = false;
 
@@ -96,6 +97,7 @@ private:
 	void HandlePollEvents(sf::RenderWindow& window, sf::Vector2f& translatedPos, sf::RectangleShape  cardSlot[4], sf::RectangleShape cardStacks[7]);
 	void LoadFromHistory();
 	void MouseClicked(sf::RenderWindow& window, sf::Vector2f translatedPos, sf::RectangleShape cardStacks[7]);
+	void RestartGame();
 	void MouseReleased(sf::RectangleShape  cardSlot[4], sf::Vector2f& translatedPos, sf::RectangleShape cardStacks[7]);
 	void ResetCardPosition();
 	void MoveToSlot(sf::RectangleShape  cardSlot[4], int i);
